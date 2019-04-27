@@ -4,7 +4,7 @@ OBJS     = serial.o cellpool.o
 # To enable visualization comment out the following lines (don't do this for benchmarking)
 #OBJS     += fluidview.o
 #CXXFLAGS += -DENABLE_VISUALIZATION
-#LIBS     += -lglut
+#LIBS     += -lglut -lGL -lGLU
 
 all: serial fluidcmp
 

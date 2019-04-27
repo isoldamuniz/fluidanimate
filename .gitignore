@@ -1,0 +1,7 @@
+log/
+pkgs/apps/fluidanimate/inst/
+pkgs/apps/fluidanimate/obj/
+pkgs/apps/fluidanimate/run/
+
+# vim
+*.swp

@@ -165,9 +165,9 @@ void Display()
 #if defined(USE_track_velocity)
   vMin *= 0.99;
   // avoid vMin == vMax (causes divide by 0)
-  vMax.x = std::max(vMax.x * 0.99, vMin.x + epsilon);
-  vMax.y = std::max(vMax.y * 0.99, vMin.y + epsilon);
-  vMax.z = std::max(vMax.z * 0.99, vMin.z + epsilon);
+  vMax.x = std::max(vMax.x * 0.99, static_cast<double>(vMin.x + epsilon));
+  vMax.y = std::max(vMax.y * 0.99, static_cast<double>(vMin.y + epsilon));
+  vMax.z = std::max(vMax.z * 0.99, static_cast<double>(vMin.z + epsilon));
 #else
   prior_y_Max = vMax.y;
   prior_y_Ave = y_Tot / (fptype)*_numCells;
