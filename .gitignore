@@ -5,3 +5,5 @@ pkgs/apps/fluidanimate/run/
 
 # vim
 *.swp
+
+slurm-*
