@@ -1,0 +1,7 @@
+#!/bin/bash
+grep -rn "pthread_" pkgs/apps/fluidanimate/src/openmp.cpp
+if [ $? == 0 ]; then
+    exit 1
+fi
+
+exit 0
