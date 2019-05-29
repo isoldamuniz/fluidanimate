@@ -14,7 +14,7 @@ endif
 
 all: openmp fluidcmp
 
-pthreads: $(OBJS)
+openmp: $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(LDFLAGS) $(LIBS) -o $(TARGET)
 
 %.o : %.cpp
