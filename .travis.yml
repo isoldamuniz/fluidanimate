@@ -1,0 +1,2 @@
+script:
+  - grep -rn "pthread_" pkgs/apps/fluidanimate/src/openmp.cpp
