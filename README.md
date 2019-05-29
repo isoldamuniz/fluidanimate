@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/cadubentzen/fluidanimate.svg?branch=master)](https://travis-ci.com/cadubentzen/fluidanimate)
+
 PARSEC Benchmark Suite 3.0
 ==========================
 
