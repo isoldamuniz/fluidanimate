@@ -8,18 +8,18 @@
 
 #include <iostream>
 #include <fstream>
+
 #if defined(WIN32)
 #define NOMINMAX
 #include <windows.h>
-#endif
+#endif // defined(WIN32)
+
 #include <math.h>
-#include <pthread.h>
 #include <assert.h>
 #include <float.h>
 
 #include "fluid.hpp"
 #include "cellpool.hpp"
-#include "parsec_barrier.hpp"
 
 #ifdef ENABLE_VISUALIZATION
 #include "fluidview.hpp"
