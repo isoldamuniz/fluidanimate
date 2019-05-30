@@ -17,6 +17,7 @@
 #include <math.h>
 #include <assert.h>
 #include <float.h>
+#include <omp.h>
 
 #include "fluid.hpp"
 #include "cellpool.hpp"
@@ -256,7 +257,7 @@ void InitSim(char const *fileName, unsigned int threadnum)
            } // for(int dk = -1; dk <= 1; ++dk)
         }
 
-  pthread_attr_init(&attr);
+  /*pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
   mutex = new pthread_mutex_t *[numCells];
@@ -267,7 +268,7 @@ void InitSim(char const *fileName, unsigned int threadnum)
     mutex[i] = new pthread_mutex_t[n];
     for(int j = 0; j < n; ++j)
       pthread_mutex_init(&mutex[i][j], NULL);
-  }
+  }*/
   pthread_barrier_init(&barrier, NULL, NUM_GRIDS);
 #ifdef ENABLE_VISUALIZATION
   //visualization barrier is used by all NUM_GRIDS worker threads and 1 master thread
@@ -729,18 +730,16 @@ void ComputeDensitiesMT(int tid)
 
                   if(border[index])
                   {
-                    pthread_mutex_lock(&mutex[index][ipar % MUTEXES_PER_CELL]);
+                    # pragma omp critical
                     cell->density[ipar % PARTICLES_PER_CELL] += tc;
-                    pthread_mutex_unlock(&mutex[index][ipar % MUTEXES_PER_CELL]);
                   }
                   else
                     cell->density[ipar % PARTICLES_PER_CELL] += tc;
 
                   if(border[indexNeigh])
                   {
-                    pthread_mutex_lock(&mutex[indexNeigh][iparNeigh % MUTEXES_PER_CELL]);
+                    # pragma omp critical
                     neigh->density[iparNeigh % PARTICLES_PER_CELL] += tc;
-                    pthread_mutex_unlock(&mutex[indexNeigh][iparNeigh % MUTEXES_PER_CELL]);
                   }
                   else
                     neigh->density[iparNeigh % PARTICLES_PER_CELL] += tc;
@@ -831,18 +830,16 @@ void ComputeForcesMT(int tid)
 
                   if( border[index])
                   {
-                    pthread_mutex_lock(&mutex[index][ipar % MUTEXES_PER_CELL]);
+                    # pragma omp critical
                     cell->a[ipar % PARTICLES_PER_CELL] += acc;
-                    pthread_mutex_unlock(&mutex[index][ipar % MUTEXES_PER_CELL]);
                   }
                   else
                     cell->a[ipar % PARTICLES_PER_CELL] += acc;
 
                   if( border[indexNeigh])
                   {
-                    pthread_mutex_lock(&mutex[indexNeigh][iparNeigh % MUTEXES_PER_CELL]);
+                    # pragma omp critical
                     neigh->a[iparNeigh % PARTICLES_PER_CELL] -= acc;
-                    pthread_mutex_unlock(&mutex[indexNeigh][iparNeigh % MUTEXES_PER_CELL]);
                   }
                   else
                     neigh->a[iparNeigh % PARTICLES_PER_CELL] -= acc;
@@ -1153,10 +1150,13 @@ void AdvanceFrameMT(int tid)
 #ifndef ENABLE_VISUALIZATION
 void *AdvanceFramesMT(void *args)
 {
-  thread_args *targs = (thread_args *)args;
+  //receber o número de frames da main e lançar no for a seguir
+  //thread_args *targs = (thread_args *)args;
+  //pegar o my_rank através de omp_get_thread_num() e passar como argumento de AdvanceFrameMT
+  int my_rank = omp_get_thread_num();
 
   for(int i = 0; i < targs->frames; ++i) {
-    AdvanceFrameMT(targs->tid);
+    AdvanceFrameMT(my_rank);
   }
   
   return NULL;
@@ -1240,7 +1240,7 @@ int main(int argc, char *argv[])
 #ifdef ENABLE_PARSEC_HOOKS
   __parsec_roi_begin();
 #endif
-#if defined(WIN32)
+/*#if defined(WIN32)
   thread_args* targs = (thread_args*)alloca(sizeof(thread_args)*threadnum);
 #else
   thread_args targs[threadnum];
@@ -1250,15 +1250,23 @@ int main(int argc, char *argv[])
     targs[i].frames = framenum;
     pthread_create(&thread[i], &attr, AdvanceFramesMT, &targs[i]);
   }
+*/
+
+//chamar a função AdvanceFramesMT enviando o framenum 
+#  pragma omp parallel num_threads(threadnum) 
+{
+  AdvanceFramesMT();
+}
 
   // *** PARALLEL PHASE *** //
 #ifdef ENABLE_VISUALIZATION
   Visualize();
 #endif
-
+/*
   for(int i = 0; i < threadnum; ++i) {
     pthread_join(thread[i], NULL);
   }
+*/
 #ifdef ENABLE_PARSEC_HOOKS
   __parsec_roi_end();
 #endif
